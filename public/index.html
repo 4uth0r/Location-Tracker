@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ارسال موقعیت</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        direction: rtl;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>📍 ارسال موقعیت شما</h2>
+    <p id="status">در حال دریافت...</p>
+    <script>
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            fetch("/loc", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude,
+                accuracy: pos.coords.accuracy,
+              }),
+            }).then(() => {
+              document.getElementById("status").textContent = "✅ ارسال موفق!";
+            });
+          },
+          (err) => {
+            document.getElementById("status").textContent = "⛔ دسترسی رد شد.";
+          }
+        );
+      } else {
+        document.getElementById("status").textContent = "⛔ پشتیبانی نمی‌شود.";
+      }
+    </script>
+  </body>
+</html>
