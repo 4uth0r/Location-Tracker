@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>نمایش زنده روی نقشه</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <style>
+    body { direction: rtl; font-family: sans-serif; }
+    #map { height: 90vh; }
+  </style>
+</head>
+<body>
+  <h3>موقعیت زنده</h3>
+  <div id="info">در حال بارگذاری...</div>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script>
+    let map = L.map('map').setView([35.7, 51.4], 13); // مقدار پیش‌فرض
+    let marker = null;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    async function updateMap() {
+      const res = await fetch("/coords");
+      const data = await res.json();
+
+      if (data.status === "no-data") {
+        document.getElementById("info").textContent = "📭 هنوز داده‌ای دریافت نشده";
+        return;
+      }
+
+      document.getElementById("info").innerHTML = `
+        عرض: ${data.lat} | طول: ${data.lon} | دقت: ${data.accuracy} متر | زمان: ${data.time}
+      `;
+
+      const latlng = [data.lat, data.lon];
+      map.setView(latlng, 16);
+
+      if (marker) {
+        marker.setLatLng(latlng);
+      } else {
+        marker = L.marker(latlng).addTo(map);
+      }
+    }
+
+    updateMap();
+    setInterval(updateMap, 5000); // هر ۵ ثانیه
+  </script>
+</body>
+</html>
